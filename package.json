@@ -1,0 +1,113 @@
+{
+	"name": "vscode-salesforce-colorg",
+	"displayName": "Salesforce colORG",
+	"publisher": "victorgz",
+	"description": "Stay organized, easily identify your default org and prevent unwanted deployments with Salesforce ColORG. The extension will automatically change the color of your VScode workspace based on the Salesforce org you're currently connected to. Define the set of rules, the colors to apply and start boosting your productivity!",
+	"icon": "assets/icon.png",
+	"version": "1.0.0",
+	"license": "SEE LICENSE IN LICENSE",
+	"author": {
+		"name": "victorgz"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/victorgz/vscode-salesforce-colorg.git"
+	},
+	"bugs": {
+		"url": "https://github.com/victorgz/vscode-salesforce-colorg/issues"
+	},
+	"homepage": "https://github.com/victorgz/vscode-salesforce-colorg/blob/master/README.md",
+	"engines": {
+		"vscode": "^1.74.0"
+	},
+	"categories": [
+		"Themes",
+		"Extension Packs",
+		"Visualization",
+		"Other"
+	],
+	"keywords": [
+		"salesforce",
+		"sfdx",
+		"theme"
+	],
+	"preview": true,
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"main": "./extension.js",
+	"contributes": {
+		"configuration": {
+			"title": "Salesforce colORG",
+			"properties": {
+				"sf-colorg.target.statusBar": {
+					"type": "boolean",
+					"default": true,
+					"description": "Apply the color to the Status Bar"
+				},
+				"sf-colorg.target.activityBar": {
+					"type": "boolean",
+					"default": false,
+					"description": "Apply the color to the Activity Bar"
+				},
+				"sf-colorg.rules": {
+					"type": "array",
+					"default": [
+						{
+							"regex": "^\\w*_PROD$",
+							"color": "#E15A60"
+						}
+					],
+					"description": "The list of rules to identify your target orgs and the color to apply. Each rule is composed by a Regular Expression (regex) to identify the org alias and the color to apply in HEX format. If your default org matches multiples rules, only the first one will be applied",
+					"items": {
+						"type": "object",
+						"properties": {
+							"regex": {
+								"type": "string",
+								"description": "Regular Expression to identify your default org alias"
+							},
+							"color": {
+								"type": "string",
+								"description": "The color in HEX format to apply to your workspace"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"pre-commit": "lint-staged",
+		"prettier": "prettier --write \"**/*\" --ignore-unknown",
+		"prettier:check": "prettier --check \"**/*\" --ignore-unknown",
+		"prepare": "husky install",
+		"release": "standard-version"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^17.4.2",
+		"@commitlint/config-conventional": "^17.4.2",
+		"@types/glob": "^8.0.0",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "16.x",
+		"@types/vscode": "^1.74.0",
+		"@vscode/test-electron": "^2.2.0",
+		"dotenv": "^16.0.3",
+		"eslint": "^8.32.0",
+		"glob": "^8.0.3",
+		"husky": "^8.0.3",
+		"lint-staged": "^13.1.0",
+		"mocha": "^10.1.0",
+		"prettier": "^2.8.3",
+		"standard-version": "^9.5.0",
+		"typescript": "^4.9.3"
+	},
+	"lint-staged": {
+		"**/*.js": [
+			"eslint"
+		],
+		"**/*": [
+			"prettier --write --ignore-unknown"
+		]
+	}
+}

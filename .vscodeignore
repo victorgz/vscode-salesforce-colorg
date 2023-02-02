@@ -1,0 +1,8 @@
+.vscode/**/*
+.gitignore
+node_modules
+commitlint.config.js
+.versionrc
+.prettierrc.json
+.eslintrc.json
+test
