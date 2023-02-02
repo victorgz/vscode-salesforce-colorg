@@ -31,7 +31,6 @@
 		"sfdx",
 		"theme"
 	],
-	"preview": true,
 	"activationEvents": [
 		"onStartupFinished"
 	],
