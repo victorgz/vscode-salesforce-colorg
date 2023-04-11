@@ -31,6 +31,7 @@ async function activate() {
 	const init = async () => {
 		// Initial setup
 		try {
+			await initialCleanup();
 			let files = await vscode.workspace.findFiles(NEW_PATH);
 
 			if (files.length > 0) {
@@ -86,6 +87,23 @@ async function setColor(color) {
 	}
 
 	await vscode.workspace
+		.getConfiguration()
+		.update(
+			'workbench.colorCustomizations',
+			colorCustomizations,
+			vscode.ConfigurationTarget.Workspace
+		);
+}
+
+// Remove previous color customizations to avoid color blinking when switching to an unknown config
+async function initialCleanup() {
+	const config = vscode.workspace.getConfiguration();
+	const colorCustomizations = config.get('workbench.colorCustomizations');
+
+	colorCustomizations['statusBar.background'] = undefined;
+	colorCustomizations['activityBar.background'] = undefined;
+
+	return vscode.workspace
 		.getConfiguration()
 		.update(
 			'workbench.colorCustomizations',

@@ -51,12 +51,6 @@
 				},
 				"sf-colorg.rules": {
 					"type": "array",
-					"default": [
-						{
-							"regex": "^\\w*_PROD$",
-							"color": "#E15A60"
-						}
-					],
 					"description": "The list of rules to identify your target orgs and the color to apply. Each rule is composed by a Regular Expression (regex) to identify the org alias and the color to apply in HEX format. If your default org matches multiples rules, only the first one will be applied",
 					"items": {
 						"type": "object",
