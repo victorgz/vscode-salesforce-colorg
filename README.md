@@ -36,12 +36,13 @@ Here there's an example with two rules configured. You can add as many as you wa
 ```
 
 You can find here some pre-defined Regular Expressions to help you with the initial setup:
-|RegEx|Description|Examples
-|--|--|--|
-|`^\\w*_PROD$`|Aliases finishing by _PROD|MyOrg_PROD, Customer_PROD...|
-|`^UAT_\\w*$`|Aliases starging with UAT_|UAT_MyOrg, UAT_Customer...|
-|`^\\w*XYZ\\w\*$`|Aliases containing XYZ|Org_XYZ, XYZ_Org, My_XYZ_Org, MyXYZOrg...|
-|`^MyOrg$`|Aliases matching exactly MyOrg|MyOrg|
+
+| RegEx            | Description                    | Examples                                  |
+| ---------------- | ------------------------------ | ----------------------------------------- |
+| `^\\w*_PROD$`    | Aliases finishing by \_PROD    | MyOrg_PROD, Customer_PROD...              |
+| `^UAT_\\w*$`     | Aliases starging with UAT\_    | UAT_MyOrg, UAT_Customer...                |
+| `^\\w*XYZ\\w\*$` | Aliases containing XYZ         | Org_XYZ, XYZ_Org, My_XYZ_Org, MyXYZOrg... |
+| `^MyOrg$`        | Aliases matching exactly MyOrg | MyOrg                                     |
 
 > Some important things to keep in mind:
 >
@@ -57,3 +58,29 @@ You can define whether the color will change in your VSCode workspace for the Ac
 <div align="center">
 		<img align="center" alt="Color target demo" src="./assets/color-target-demo.png" />
 </div>
+
+## FAQ
+
+### After the release 1.1.0, the color is not changing anymore when I select a different org alias
+
+<details>
+	<summary>See details</summary>
+	The configuration for a VSCode extension can be done at two levels: User and Workspace. Initially, the extension was configured to work only at User level.
+	In the release 1.1.0 we added a feature to support multiple VSCode windows (workspaces) opened at the same time with different projects. VSCode will first get the configuration defined at Workspace-level, and if none is found, then it will get the one at User-level. Because of this, if there's a Workspace-level configuration defined (or empty list of rules for example), the extension will use those rules and you might not see any change of color. To fix this:
+	1. Go to you VSCode Settings and find the Salesforce ColORG extension
+	<div align="center">
+			<img align="center" alt="Color target demo" src="./assets/faq_1_1_settings.png" />
+	</div>
+	2. For the Rules attribute, if you see _Also modified in Workspace_, it means that you have a set of rules also defined at Workspace-level
+	<div align="center">
+			<img align="center" alt="Color target demo" src="./assets/faq_1_2_user_settings.png" />
+	</div>
+	3. Click on Workspace, and edit the Rules (Workspace-level) in the `settings.json` file
+	<div align="center">
+			<img align="center" alt="Color target demo" src="./assets/faq_1_3_workspace_settings.png" />
+	</div>
+	3. You can either modify the JSON to apply a set of rules that will be used only for this Workspace, or delete it (including the attribute name `sf-colorg.rules`) so the User-level rules will be applied for your workspaces
+	<div align="center">
+			<img align="center" alt="Color target demo" src="./assets/faq_1_4_workspace_settings_json.png" />
+	</div>
+</details>
