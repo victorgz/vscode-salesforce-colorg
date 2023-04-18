@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
+const path = require('path');
 const watchers = [];
 const OLD_PATH = '**/.sfdx/sfdx-config.json';
 const NEW_PATH = '**/.sf/config.json';
@@ -10,13 +11,13 @@ const NEW_PATH = '**/.sf/config.json';
 
 async function activate() {
 	const handleFileContent = (uri) => {
-		const file = requireUncached(uri.path);
+		const file = requireUncached(path.resolve(uri.fsPath));
 		const conf = vscode.workspace.getConfiguration();
 
 		const targets = conf.get('sf-colorg.rules') || [];
 		let targetColor = null;
 		for (let target of targets) {
-			const attribute = uri.path.includes('/.sfdx/')
+			const attribute = uri.fsPath.includes('/.sfdx/')
 				? 'defaultusername'
 				: 'target-org';
 
@@ -32,12 +33,12 @@ async function activate() {
 		// Initial setup
 		try {
 			await initialCleanup();
-			let files = await vscode.workspace.findFiles(NEW_PATH);
+			let files = await vscode.workspace.findFiles(NEW_PATH, null, 1);
 
 			if (files.length > 0) {
 				handleFileContent(files[0]);
 			} else {
-				files = await vscode.workspace.findFiles(OLD_PATH);
+				files = await vscode.workspace.findFiles(OLD_PATH, null, 1);
 
 				if (files.length > 0) {
 					handleFileContent(files[0]);
@@ -57,9 +58,23 @@ async function activate() {
 		}
 	});
 
-	// File change watchet
-	watchers.push(vscode.workspace.createFileSystemWatcher(OLD_PATH));
-	watchers.push(vscode.workspace.createFileSystemWatcher(NEW_PATH));
+	// File change watcher
+	let oldPathFile = await vscode.workspace.findFiles(OLD_PATH, null, 1);
+	if (oldPathFile.length > 0) {
+		watchers.push(
+			vscode.workspace.createFileSystemWatcher(
+				path.resolve(oldPathFile[0].fsPath)
+			)
+		);
+	}
+	let newPathFiles = await vscode.workspace.findFiles(NEW_PATH, null, 1);
+	if (newPathFiles.length > 0) {
+		watchers.push(
+			vscode.workspace.createFileSystemWatcher(
+				path.resolve(newPathFiles[0].fsPath)
+			)
+		);
+	}
 
 	// Event listener
 	watchers.forEach((watcher) => {
@@ -113,8 +128,8 @@ async function initialCleanup() {
 }
 
 function requireUncached(module) {
-	delete require.cache[require.resolve(module)];
-	return require(module);
+	delete require.cache[require.resolve(path.resolve(module))];
+	return require(path.resolve(module));
 }
 
 // This method is called when your extension is deactivated
