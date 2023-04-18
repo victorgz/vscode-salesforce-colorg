@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/victorgz/vscode-salesforce-colorg/compare/v1.1.0...v1.1.1) (2023-04-18)
+
+### Bug Fixes
+
+-   file path resolution for Windows users ([40036ed](https://github.com/victorgz/vscode-salesforce-colorg/commit/40036ed0c559935d996a76080cd02485b85b1aad))
+
 ## [1.1.0](https://github.com/victorgz/vscode-salesforce-colorg/compare/v1.0.1...v1.1.0) (2023-04-11)
 
 ### Features

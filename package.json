@@ -4,7 +4,7 @@
 	"publisher": "victorgz",
 	"description": "Stay organized, easily identify your default org and prevent unwanted deployments with Salesforce ColORG. The extension will automatically change the color of your VScode workspace based on the Salesforce org you're currently connected to. Define the set of rules, the colors to apply and start boosting your productivity!",
 	"icon": "assets/icon.png",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"license": "SEE LICENSE IN LICENSE",
 	"author": {
 		"name": "victorgz"
