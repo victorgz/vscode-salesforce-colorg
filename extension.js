@@ -10,6 +10,19 @@ const NEW_PATH = '**/.sf/config.json';
 // Your extension is activated the very first time the command is executed
 
 async function activate() {
+	// Event listener for when the active text editor changes
+	vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+		if (editor) {
+			const uri = editor.document.uri;
+			const newPathFiles = await vscode.workspace.findFiles(NEW_PATH, null, 1);
+			const oldPathFiles = await vscode.workspace.findFiles(OLD_PATH, null, 1);
+			const filePaths = newPathFiles.concat(oldPathFiles).map(file => file.fsPath);
+			if (filePaths.includes(uri.fsPath)) {
+				handleFileContent(uri);
+			}
+		}
+	});
+
 	const handleFileContent = (uri) => {
 		const file = requireUncached(path.resolve(uri.fsPath));
 		const conf = vscode.workspace.getConfiguration();
