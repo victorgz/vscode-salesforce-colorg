@@ -85,29 +85,34 @@ async function activate() {
 
 async function setColor(color) {
 	const config = vscode.workspace.getConfiguration();
-	const colorCustomizations = config.get('workbench.colorCustomizations');
+	const settingsScope = config.get('sf-colorg.target.settingsScope') || 'workspace';
+	const target = settingsScope === 'workspace' ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+    const colorCustomizations = config.get('workbench.colorCustomizations');
 	const statusBar = config.get('sf-colorg.target.statusBar');
 	const activityBar = config.get('sf-colorg.target.activityBar');
 
-	if (statusBar || color == null) {
-		colorCustomizations['statusBar.background'] = color;
-	} else {
-		colorCustomizations['statusBar.background'] = undefined;
-	}
+	const activeEditor = vscode.window.activeTextEditor;
+    if (activeEditor) {
+		if (statusBar || color == null) {
+			colorCustomizations['statusBar.background'] = color;
+		} else {
+			colorCustomizations['statusBar.background'] = undefined;
+		}
 
-	if (activityBar || color == null) {
-		colorCustomizations['activityBar.background'] = color;
-	} else {
-		colorCustomizations['activityBar.background'] = undefined;
-	}
+		if (activityBar || color == null) {
+			colorCustomizations['activityBar.background'] = color;
+		} else {
+			colorCustomizations['activityBar.background'] = undefined;
+		}
 
-	await vscode.workspace
-		.getConfiguration()
-		.update(
-			'workbench.colorCustomizations',
-			colorCustomizations,
-			vscode.ConfigurationTarget.Workspace
-		);
+		await vscode.workspace
+			.getConfiguration()
+			.update(
+				'workbench.colorCustomizations',
+				colorCustomizations,
+				target
+			);
+	}
 }
 
 // Remove previous color customizations to avoid color blinking when switching to an unknown config

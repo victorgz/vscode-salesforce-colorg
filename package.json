@@ -65,7 +65,13 @@
 							}
 						}
 					}
-				}
+				},
+				"sf-colorg.target.settingsScope": {
+					"type": "string",
+					"default": "workspace",
+					"enum": ["workspace", "user"],
+					"description": "Specify where to apply the color settings (workspace or user)"
+				}				
 			}
 		}
 	},
