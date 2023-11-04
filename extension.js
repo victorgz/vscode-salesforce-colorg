@@ -8,38 +8,32 @@ const NEW_PATH = '**/.sf/config.json';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-
 async function activate() {
-	// Event listener for when the active text editor changes
-	vscode.window.onDidChangeActiveTextEditor(async (editor) => {
-		if (editor) {
-			const uri = editor.document.uri;
-			const newPathFiles = await vscode.workspace.findFiles(NEW_PATH, null, 1);
-			const oldPathFiles = await vscode.workspace.findFiles(OLD_PATH, null, 1);
-			const filePaths = newPathFiles.concat(oldPathFiles).map(file => file.fsPath);
-			if (filePaths.includes(uri.fsPath)) {
-				handleFileContent(uri);
-			}
-		}
-	});
-
+	/**
+	 *
+	 * @param {string} uri - file uri of the config file
+	 */
 	const handleFileContent = (uri) => {
 		const file = requireUncached(path.resolve(uri.fsPath));
 		const conf = vscode.workspace.getConfiguration();
 
 		const targets = conf.get('sf-colorg.rules') || [];
-		let targetColor = null;
+
+		// Setting as undefined to keep the settings files a bit cleaner
+		let targetBackgroundColor = undefined;
+		let targetForegroundColor = undefined;
 		for (let target of targets) {
 			const attribute = uri.fsPath.includes('/.sfdx/')
 				? 'defaultusername'
 				: 'target-org';
 
 			if (new RegExp(target.regex).test(file[attribute])) {
-				targetColor = target.color;
+				targetBackgroundColor = target.color;
+				targetForegroundColor = target.foregroundColor;
 				break;
 			}
 		}
-		setColor(targetColor);
+		setColor(targetBackgroundColor, targetForegroundColor);
 	};
 
 	const init = async () => {
@@ -71,6 +65,22 @@ async function activate() {
 		}
 	});
 
+	// Event listener for when the window is focused
+	vscode.window.onDidChangeWindowState(async () => {
+		// When focusing outside of active SF window, remove color
+		if (!vscode.window.state.focused) {
+			setColor(undefined, undefined);
+		} else {
+			const isASfProject = await checkIfInSfProject();
+			// If the focused window is confirmed to be a SF project
+			if (isASfProject) {
+				init();
+			} else {
+				setColor(undefined, undefined);
+			}
+		}
+	});
+
 	// File change watcher
 	let oldPathFile = await vscode.workspace.findFiles(OLD_PATH, null, 1);
 	if (oldPathFile.length > 0) {
@@ -96,53 +106,85 @@ async function activate() {
 	});
 }
 
-async function setColor(color) {
+/**
+ * Checks if the active editor is in a Salesforcxe project
+ * @returns {boolean} true if the active editor is in a Salesforce project
+ */
+async function checkIfInSfProject() {
+	const sfdxConfigFiles = await vscode.workspace.findFiles(
+		OLD_PATH || NEW_PATH,
+		null,
+		1
+	);
+
+	if (sfdxConfigFiles.length > 0) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ *
+ * @param {string} backgroundColor - hex color code for background color
+ * @param {string} [foregroundColor] - hex color code for foreground color (Optional)
+ */
+async function setColor(backgroundColor, foregroundColor) {
 	const config = vscode.workspace.getConfiguration();
-	const settingsScope = config.get('sf-colorg.target.settingsScope') || 'workspace';
-	const target = settingsScope === 'workspace' ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
-    const colorCustomizations = config.get('workbench.colorCustomizations');
+	const settingsScope =
+		config.get('sf-colorg.target.settingsScope') || 'workspace';
+	const target =
+		settingsScope === 'workspace'
+			? vscode.ConfigurationTarget.Workspace
+			: vscode.ConfigurationTarget.Global;
+	const colorCustomizations = config.get('workbench.colorCustomizations');
 	const statusBar = config.get('sf-colorg.target.statusBar');
 	const activityBar = config.get('sf-colorg.target.activityBar');
 
-	const activeEditor = vscode.window.activeTextEditor;
-    if (activeEditor) {
-		if (statusBar || color == null) {
-			colorCustomizations['statusBar.background'] = color;
-		} else {
-			colorCustomizations['statusBar.background'] = undefined;
-		}
-
-		if (activityBar || color == null) {
-			colorCustomizations['activityBar.background'] = color;
-		} else {
-			colorCustomizations['activityBar.background'] = undefined;
-		}
-
-		await vscode.workspace
-			.getConfiguration()
-			.update(
-				'workbench.colorCustomizations',
-				colorCustomizations,
-				target
-			);
+	if (backgroundColor === undefined) {
+		// remove color settings entries
+		colorCustomizations['statusBar.foreground'] = undefined;
+		colorCustomizations['statusBar.background'] = undefined;
 	}
+	if (statusBar) {
+		colorCustomizations['statusBar.foreground'] = foregroundColor;
+		colorCustomizations['statusBar.background'] = backgroundColor;
+	} else {
+		colorCustomizations['statusBar.foreground'] = undefined;
+		colorCustomizations['statusBar.background'] = undefined;
+	}
+
+	if (activityBar) {
+		colorCustomizations['activityBar.inactiveForeground'] = foregroundColor;
+		colorCustomizations['activityBar.background'] = backgroundColor;
+	} else {
+		colorCustomizations['activityBar.inactiveForeground'] = undefined;
+		colorCustomizations['activityBar.background'] = undefined;
+	}
+
+	await vscode.workspace
+		.getConfiguration()
+		.update('workbench.colorCustomizations', colorCustomizations, target);
 }
 
 // Remove previous color customizations to avoid color blinking when switching to an unknown config
 async function initialCleanup() {
 	const config = vscode.workspace.getConfiguration();
+	const settingsScope =
+		config.get('sf-colorg.target.settingsScope') || 'workspace';
+	const target =
+		settingsScope === 'workspace'
+			? vscode.ConfigurationTarget.Workspace
+			: vscode.ConfigurationTarget.Global;
 	const colorCustomizations = config.get('workbench.colorCustomizations');
 
+	colorCustomizations['statusBar.foreground'] = undefined;
 	colorCustomizations['statusBar.background'] = undefined;
+	colorCustomizations['activityBar.inactiveForeground'] = undefined;
 	colorCustomizations['activityBar.background'] = undefined;
 
 	return vscode.workspace
 		.getConfiguration()
-		.update(
-			'workbench.colorCustomizations',
-			colorCustomizations,
-			vscode.ConfigurationTarget.Global
-		);
+		.update('workbench.colorCustomizations', colorCustomizations, target);
 }
 
 function requireUncached(module) {
@@ -155,7 +197,7 @@ async function deactivate() {
 	watchers.forEach((watcher) => {
 		watcher.dispose();
 	});
-	setColor(null);
+	setColor(undefined, undefined);
 }
 
 module.exports = {

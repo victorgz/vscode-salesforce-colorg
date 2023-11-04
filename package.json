@@ -4,7 +4,7 @@
 	"publisher": "victorgz",
 	"description": "Stay organized, easily identify your default org and prevent unwanted deployments with Salesforce ColORG. The extension will automatically change the color of your VScode workspace based on the Salesforce org you're currently connected to. Define the set of rules, the colors to apply and start boosting your productivity!",
 	"icon": "assets/icon.png",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"license": "SEE LICENSE IN LICENSE",
 	"author": {
 		"name": "victorgz"
@@ -61,17 +61,21 @@
 							},
 							"color": {
 								"type": "string",
-								"description": "The color in HEX format to apply to your workspace"
+								"description": "The background color in HEX format to apply to your workspace"
+							},
+							"foregroundColor": {
+								"type": "string",
+								"description": "The foreground color for the status bar and/or activity bar. It is composed by a Regular Expression (regex) to identify the org alias and the color to apply in HEX format."
 							}
 						}
 					}
 				},
 				"sf-colorg.target.settingsScope": {
 					"type": "string",
-					"default": "workspace",
+					"default": "user",
 					"enum": ["workspace", "user"],
-					"description": "Specify where to apply the color settings (workspace or user)"
-				}				
+					"description": "Specify where to apply the color settings (user or workspace JSON settings file)"
+				}
 			}
 		}
 	},
