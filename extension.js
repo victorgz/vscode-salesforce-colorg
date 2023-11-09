@@ -49,6 +49,8 @@ async function activate() {
 
 				if (files.length > 0) {
 					handleFileContent(files[0]);
+				} else {
+					setColor(undefined, undefined);
 				}
 			}
 		} catch (err) {
@@ -56,28 +58,27 @@ async function activate() {
 		}
 	};
 
-	init();
+	const handleInit = async () => {
+		try {
+			await init();
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
-	// Config change listener
+	handleInit();
+
 	vscode.workspace.onDidChangeConfiguration((changeConfigEvent) => {
 		if (changeConfigEvent.affectsConfiguration('sf-colorg')) {
-			init();
+			handleInit();
 		}
 	});
 
-	// Event listener for when the window is focused
 	vscode.window.onDidChangeWindowState(async () => {
-		// When focusing outside of active SF window, remove color
 		if (!vscode.window.state.focused) {
-			setColor(undefined, undefined);
+			setColor();
 		} else {
-			const isASfProject = await checkIfInSfProject();
-			// If the focused window is confirmed to be a SF project
-			if (isASfProject) {
-				init();
-			} else {
-				setColor(undefined, undefined);
-			}
+			handleInit();
 		}
 	});
 
@@ -107,23 +108,6 @@ async function activate() {
 }
 
 /**
- * Checks if the active editor is in a Salesforcxe project
- * @returns {boolean} true if the active editor is in a Salesforce project
- */
-async function checkIfInSfProject() {
-	const sfdxConfigFiles = await vscode.workspace.findFiles(
-		OLD_PATH || NEW_PATH,
-		null,
-		1
-	);
-
-	if (sfdxConfigFiles.length > 0) {
-		return true;
-	}
-	return false;
-}
-
-/**
  *
  * @param {string} backgroundColor - hex color code for background color
  * @param {string} [foregroundColor] - hex color code for foreground color (Optional)
@@ -136,34 +120,28 @@ async function setColor(backgroundColor, foregroundColor) {
 		settingsScope === 'workspace'
 			? vscode.ConfigurationTarget.Workspace
 			: vscode.ConfigurationTarget.Global;
-	const colorCustomizations = config.get('workbench.colorCustomizations');
-	const statusBar = config.get('sf-colorg.target.statusBar');
-	const activityBar = config.get('sf-colorg.target.activityBar');
+	const newColorCustomizations = { ...colorCustomizations };
 
-	if (backgroundColor === undefined) {
-		// remove color settings entries
-		colorCustomizations['statusBar.foreground'] = undefined;
-		colorCustomizations['statusBar.background'] = undefined;
-	}
-	if (statusBar) {
-		colorCustomizations['statusBar.foreground'] = foregroundColor;
-		colorCustomizations['statusBar.background'] = backgroundColor;
-	} else {
-		colorCustomizations['statusBar.foreground'] = undefined;
-		colorCustomizations['statusBar.background'] = undefined;
-	}
+	if (backgroundColor) {
+		if (statusBar) {
+			newColorCustomizations['statusBar.foreground'] = foregroundColor;
+			newColorCustomizations['statusBar.background'] = backgroundColor;
+		}
 
-	if (activityBar) {
-		colorCustomizations['activityBar.inactiveForeground'] = foregroundColor;
-		colorCustomizations['activityBar.background'] = backgroundColor;
-	} else {
-		colorCustomizations['activityBar.inactiveForeground'] = undefined;
-		colorCustomizations['activityBar.background'] = undefined;
+		if (activityBar) {
+			newColorCustomizations['activityBar.inactiveForeground'] =
+				foregroundColor;
+			newColorCustomizations['activityBar.background'] = backgroundColor;
+		}
 	}
 
 	await vscode.workspace
 		.getConfiguration()
-		.update('workbench.colorCustomizations', colorCustomizations, target);
+		.update(
+			'workbench.colorCustomizations',
+			newColorCustomizations,
+			target
+		);
 }
 
 // Remove previous color customizations to avoid color blinking when switching to an unknown config
@@ -188,8 +166,8 @@ async function initialCleanup() {
 }
 
 function requireUncached(module) {
-	delete require.cache[require.resolve(path.resolve(module))];
-	return require(path.resolve(module));
+    delete require.cache[require.resolve(module)];
+    return require(module);
 }
 
 // This method is called when your extension is deactivated
@@ -203,4 +181,6 @@ async function deactivate() {
 module.exports = {
 	activate,
 	deactivate,
+	setColor,
+	initialCleanup,
 };
