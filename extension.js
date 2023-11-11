@@ -130,15 +130,10 @@ async function checkIfInSfProject() {
  */
 async function setColor(backgroundColor, foregroundColor) {
 	const config = vscode.workspace.getConfiguration();
-	const settingsScope =
-		config.get('sf-colorg.target.settingsScope') || 'workspace';
-	const target =
-		settingsScope === 'workspace'
-			? vscode.ConfigurationTarget.Workspace
-			: vscode.ConfigurationTarget.Global;
 	const colorCustomizations = config.get('workbench.colorCustomizations');
 	const statusBar = config.get('sf-colorg.target.statusBar');
 	const activityBar = config.get('sf-colorg.target.activityBar');
+	const colorSettingsTarget = getSettingsScope(config);
 
 	if (backgroundColor === undefined) {
 		// remove color settings entries
@@ -163,19 +158,14 @@ async function setColor(backgroundColor, foregroundColor) {
 
 	await vscode.workspace
 		.getConfiguration()
-		.update('workbench.colorCustomizations', colorCustomizations, target);
+		.update('workbench.colorCustomizations', colorCustomizations, colorSettingsTarget);
 }
 
 // Remove previous color customizations to avoid color blinking when switching to an unknown config
 async function initialCleanup() {
 	const config = vscode.workspace.getConfiguration();
-	const settingsScope =
-		config.get('sf-colorg.target.settingsScope') || 'workspace';
-	const target =
-		settingsScope === 'workspace'
-			? vscode.ConfigurationTarget.Workspace
-			: vscode.ConfigurationTarget.Global;
 	const colorCustomizations = config.get('workbench.colorCustomizations');
+	const target = getSettingsScope(config);
 
 	colorCustomizations['statusBar.foreground'] = undefined;
 	colorCustomizations['statusBar.background'] = undefined;
@@ -185,6 +175,26 @@ async function initialCleanup() {
 	return vscode.workspace
 		.getConfiguration()
 		.update('workbench.colorCustomizations', colorCustomizations, target);
+}
+
+/**
+ * Returns the configuration target for the settings scope in which color changes will be added 
+ * in specified in the extensions configuration.
+ * Defaults to 'Global' if not specified.
+ * 
+ * @param {vscode.WorkspaceConfiguration} config - workspace configuration object
+ * @returns {vscode.ConfigurationTarget} - color settings target
+ */
+function getSettingsScope(config) {
+	// default to 'user' if setting is absent
+	let settingsScope = config.get('sf-colorg.target.settingsScope') || 'user';
+
+	if (settingsScope === 'workspace') {
+		// workspace settings
+		return vscode.ConfigurationTarget.Workspace;
+	}
+	// user settings
+	return vscode.ConfigurationTarget.Global;
 }
 
 function requireUncached(module) {
