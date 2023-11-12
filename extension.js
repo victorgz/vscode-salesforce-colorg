@@ -188,7 +188,7 @@ async function initialCleanup() {
 function getSettingsScope(config) {
 	try {
 		// default to 'user' if setting is absent
-		let settingsScope =
+		const settingsScope =
 			config.get('sf-colorg.target.settingsScope') || 'user';
 
 		if (settingsScope === 'workspace') {
