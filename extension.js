@@ -164,17 +164,22 @@ async function setColor(backgroundColor, foregroundColor) {
 // Remove previous color customizations to avoid color blinking when switching to an unknown config
 async function initialCleanup() {
 	const config = vscode.workspace.getConfiguration();
-	const colorCustomizations = config.get('workbench.colorCustomizations');
 	const target = getSettingsScope(config);
 
-	colorCustomizations['statusBar.foreground'] = undefined;
-	colorCustomizations['statusBar.background'] = undefined;
-	colorCustomizations['activityBar.inactiveForeground'] = undefined;
-	colorCustomizations['activityBar.background'] = undefined;
+	if (target === vscode.ConfigurationTarget.Global) {
+		const colorCustomizations = config.get('workbench.colorCustomizations');
 
-	return vscode.workspace
-		.getConfiguration()
-		.update('workbench.colorCustomizations', colorCustomizations, target);
+		colorCustomizations['statusBar.foreground'] = undefined;
+		colorCustomizations['statusBar.background'] = undefined;
+		colorCustomizations['activityBar.inactiveForeground'] = undefined;
+		colorCustomizations['activityBar.background'] = undefined;
+
+		return config.update(
+			'workbench.colorCustomizations',
+			colorCustomizations,
+			target
+		);
+	}
 }
 
 /**
