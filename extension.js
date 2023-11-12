@@ -115,7 +115,7 @@ async function activate() {
 }
 
 /**
- * Checks if the active editor is in a Salesforcxe project
+ * Checks if the active editor is in a Salesforce project
  * @returns {boolean} true if the active editor is in a Salesforce project
  */
 async function checkIfInSfProject() {
