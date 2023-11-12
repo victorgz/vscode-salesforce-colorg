@@ -133,44 +133,32 @@ async function checkIfInSfProject() {
 }
 
 /**
- *
- * @param {string} backgroundColor - hex color code for background color
- * @param {string} [foregroundColor] - hex color code for foreground color (Optional)
+ * Updates the VSCode workbench colors for the status and activity bars.
+ * @param {string} backgroundColor - Hex color code for the background color.
+ * @param {string} [foregroundColor] - Optional hex color code for the foreground color.
  */
 async function setColor(backgroundColor, foregroundColor) {
-	const config = vscode.workspace.getConfiguration();
-	const colorCustomizations = config.get('workbench.colorCustomizations');
-	const statusBar = config.get('sf-colorg.target.statusBar');
-	const activityBar = config.get('sf-colorg.target.activityBar');
-	const colorSettingsTarget = getSettingsScope(config);
+    const config = vscode.workspace.getConfiguration();
+	const newColorSettings = {};
 
-	if (backgroundColor === undefined) {
-		// remove color settings entries
-		colorCustomizations['statusBar.foreground'] = undefined;
-		colorCustomizations['statusBar.background'] = undefined;
-	}
-	if (statusBar) {
-		colorCustomizations['statusBar.foreground'] = foregroundColor;
-		colorCustomizations['statusBar.background'] = backgroundColor;
-	} else {
-		colorCustomizations['statusBar.foreground'] = undefined;
-		colorCustomizations['statusBar.background'] = undefined;
+	newColorSettings['statusBar.background'] = backgroundColor;
+	newColorSettings['activityBar.background'] = backgroundColor;
+	if (foregroundColor !== undefined) {
+		newColorSettings['statusBar.foreground'] = foregroundColor;
+		newColorSettings['activityBar.inactiveForeground'] = foregroundColor;
 	}
 
-	if (activityBar) {
-		colorCustomizations['activityBar.inactiveForeground'] = foregroundColor;
-		colorCustomizations['activityBar.background'] = backgroundColor;
-	} else {
-		colorCustomizations['activityBar.inactiveForeground'] = undefined;
-		colorCustomizations['activityBar.background'] = undefined;
-	}
-
-	await config.update(
-		'workbench.colorCustomizations',
-		colorCustomizations,
-		colorSettingsTarget
-	);
+    try {
+        await config.update(
+            'workbench.colorCustomizations',
+            newColorSettings,
+            getSettingsScope(config)
+        );
+    } catch (error) {
+        console.error('Error updating color settings:', error);
+    }
 }
+
 
 // Remove previous color customizations to avoid color blinking when switching to an unknown config
 async function initialCleanup() {
