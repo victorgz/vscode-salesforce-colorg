@@ -142,10 +142,8 @@ async function setColor(backgroundColor, foregroundColor) {
 
 	newColorSettings['statusBar.background'] = backgroundColor;
 	newColorSettings['activityBar.background'] = backgroundColor;
-	if (foregroundColor !== undefined) {
-		newColorSettings['statusBar.foreground'] = foregroundColor;
-		newColorSettings['activityBar.inactiveForeground'] = foregroundColor;
-	}
+	newColorSettings['statusBar.foreground'] = foregroundColor;
+	newColorSettings['activityBar.inactiveForeground'] = foregroundColor;
 
 	try {
 		await config.update(
