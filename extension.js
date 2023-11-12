@@ -137,7 +137,7 @@ async function checkIfInSfProject() {
  * @param {string} [foregroundColor] - Optional hex color code for the foreground color.
  */
 async function setColor(backgroundColor, foregroundColor) {
-    const config = vscode.workspace.getConfiguration();
+	const config = vscode.workspace.getConfiguration();
 	const newColorSettings = {};
 
 	newColorSettings['statusBar.background'] = backgroundColor;
@@ -147,17 +147,16 @@ async function setColor(backgroundColor, foregroundColor) {
 		newColorSettings['activityBar.inactiveForeground'] = foregroundColor;
 	}
 
-    try {
-        await config.update(
-            'workbench.colorCustomizations',
-            newColorSettings,
-            getSettingsScope(config)
-        );
-    } catch (error) {
-        console.error('Error updating color settings:', error);
-    }
+	try {
+		await config.update(
+			'workbench.colorCustomizations',
+			newColorSettings,
+			getSettingsScope(config)
+		);
+	} catch (error) {
+		console.error('Error updating color settings:', error);
+	}
 }
-
 
 // Remove previous color customizations to avoid color blinking when switching to an unknown config
 async function initialCleanup() {
