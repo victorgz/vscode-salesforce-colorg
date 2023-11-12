@@ -65,7 +65,7 @@
 							},
 							"foregroundColor": {
 								"type": "string",
-								"description": "The foreground color for the status bar and/or activity bar. It is composed by a Regular Expression (regex) to identify the org alias and the color to apply in HEX format."
+								"description": "The foreground color in HEX format to apply to your workspace"
 							}
 						}
 					}
