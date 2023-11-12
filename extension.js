@@ -67,10 +67,12 @@ async function activate() {
 
 	// Event listener for when the window is focused
 	vscode.window.onDidChangeWindowState(async () => {
-		// When focusing outside of active SF window, remove color
-		if (!vscode.window.state.focused) {
-			setColor(undefined, undefined);
-		} else {
+		const config = vscode.workspace.getConfiguration();
+
+		if (
+			!vscode.window.state.focused &&
+			config.get('sf-colorg.target.settingsScope') === 'user'
+		) {
 			const isASfProject = await checkIfInSfProject();
 			// If the focused window is confirmed to be a SF project
 			if (isASfProject) {
