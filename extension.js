@@ -165,9 +165,11 @@ async function setColor(backgroundColor, foregroundColor) {
 		colorCustomizations['activityBar.background'] = undefined;
 	}
 
-	await vscode.workspace
-		.getConfiguration()
-		.update('workbench.colorCustomizations', colorCustomizations, colorSettingsTarget);
+	await config.update(
+		'workbench.colorCustomizations',
+		colorCustomizations,
+		colorSettingsTarget
+	);
 }
 
 // Remove previous color customizations to avoid color blinking when switching to an unknown config
@@ -192,23 +194,28 @@ async function initialCleanup() {
 }
 
 /**
- * Returns the configuration target for the settings scope in which color changes will be added 
+ * Returns the configuration target for the settings scope in which color changes will be added
  * in specified in the extensions configuration.
  * Defaults to 'Global' if not specified.
- * 
+ *
  * @param {vscode.WorkspaceConfiguration} config - workspace configuration object
  * @returns {vscode.ConfigurationTarget} - color settings target
  */
 function getSettingsScope(config) {
-	// default to 'user' if setting is absent
-	let settingsScope = config.get('sf-colorg.target.settingsScope') || 'user';
+	try {
+		// default to 'user' if setting is absent
+		let settingsScope =
+			config.get('sf-colorg.target.settingsScope') || 'user';
 
-	if (settingsScope === 'workspace') {
-		// workspace settings
-		return vscode.ConfigurationTarget.Workspace;
+		if (settingsScope === 'workspace') {
+			// workspace settings
+			return vscode.ConfigurationTarget.Workspace;
+		}
+		// user settings
+		return vscode.ConfigurationTarget.Global;
+	} catch (error) {
+		console.error('Error in getting settings scope: ', error);
 	}
-	// user settings
-	return vscode.ConfigurationTarget.Global;
 }
 
 function requireUncached(module) {
