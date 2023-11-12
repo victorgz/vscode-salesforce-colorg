@@ -5,8 +5,7 @@ const path = require('path');
 const watchers = [];
 const OLD_PATH = '**/.sfdx/sfdx-config.json';
 const NEW_PATH = '**/.sf/config.json';
-let targetBackgroundColor = undefined;
-let targetForegroundColor = undefined;
+let sfConfigFile = undefined;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -19,6 +18,8 @@ async function activate() {
 		const file = requireUncached(path.resolve(uri.fsPath));
 		const conf = vscode.workspace.getConfiguration();
 		const targets = conf.get('sf-colorg.rules') || [];
+		let targetBackgroundColor = undefined;
+		let targetForegroundColor = undefined;
 
 		for (let target of targets) {
 			const attribute = uri.fsPath.includes('/.sfdx/')
@@ -41,11 +42,13 @@ async function activate() {
 			let files = await vscode.workspace.findFiles(NEW_PATH, null, 1);
 
 			if (files.length > 0) {
+				sfConfigFile = files[0];
 				handleFileContent(files[0]);
 			} else {
 				files = await vscode.workspace.findFiles(OLD_PATH, null, 1);
 
 				if (files.length > 0) {
+					sfConfigFile = files[0];
 					handleFileContent(files[0]);
 				}
 			}
@@ -66,6 +69,9 @@ async function activate() {
 	// Event listener for when the window is focused
 	vscode.window.onDidChangeWindowState(() => {
 		const config = vscode.workspace.getConfiguration();
+		if (sfConfigFile === undefined) {
+			return;
+		}
 
 		if (
 			!vscode.window.state.focused &&
@@ -77,14 +83,7 @@ async function activate() {
 			// If the focused window is confirmed to be a SF project
 			if (isASfProject) {
 				// Bypass initialization if targets are already available
-				if (targetBackgroundColor !== undefined) {
-					return setColor(
-						targetBackgroundColor,
-						targetForegroundColor
-					);
-				}
-				// Initialize if targets are not available
-				return init();
+				return handleFileContent(sfConfigFile);
 			}
 			return setColor(undefined, undefined);
 		}
