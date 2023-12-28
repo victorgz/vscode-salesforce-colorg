@@ -5,7 +5,21 @@ const path = require('path');
 const watchers = [];
 const OLD_PATH = '**/.sfdx/sfdx-config.json';
 const NEW_PATH = '**/.sf/config.json';
-let sfConfigFile = undefined;
+const outputChannel = vscode.window.createOutputChannel('SF Colorg');
+
+async function getSfConfigFile() {
+    const configFile = await vscode.workspace.findFiles(
+        `{${NEW_PATH},${OLD_PATH}}`,
+        '**/node_modules/**',
+        1
+    );
+
+    outputChannel.appendLine(`Config file: ${configFile}`);
+
+    // return regardless of whether it's found or not
+    return configFile[0];
+}
+
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -37,23 +51,14 @@ async function activate() {
 
 	const init = async () => {
 		// Initial setup
-		try {
-			await initialCleanup();
-			let files = await vscode.workspace.findFiles(NEW_PATH, null, 1);
+		await initialCleanup();
+		const sfConfigFile = await getSfConfigFile();
 
-			if (files.length > 0) {
-				sfConfigFile = files[0];
-				handleFileContent(files[0]);
-			} else {
-				files = await vscode.workspace.findFiles(OLD_PATH, null, 1);
-
-				if (files.length > 0) {
-					sfConfigFile = files[0];
-					handleFileContent(files[0]);
-				}
-			}
-		} catch (err) {
-			console.error(err);
+		if (!sfConfigFile) {
+			return;
+		} else {
+			outputChannel.appendLine('Found config file:', JSON.stringify(sfConfigFile));
+			handleFileContent(sfConfigFile);
 		}
 	};
 
@@ -67,10 +72,12 @@ async function activate() {
 	});
 
 	// Event listener for when the window is focused
-	vscode.window.onDidChangeWindowState(() => {
+	vscode.window.onDidChangeWindowState(async() => {
 		const config = vscode.workspace.getConfiguration();
-		if (sfConfigFile === undefined) {
-			return;
+		const sfConfigFile = await getSfConfigFile();
+
+		if (!sfConfigFile) {
+			return setColor(undefined, undefined);
 		}
 
 		if (
@@ -98,11 +105,11 @@ async function activate() {
 			)
 		);
 	}
-	let newPathFiles = await vscode.workspace.findFiles(NEW_PATH, null, 1);
-	if (newPathFiles.length > 0) {
+	let newPathFile = await vscode.workspace.findFiles(NEW_PATH, null, 1);
+	if (newPathFile.length > 0) {
 		watchers.push(
 			vscode.workspace.createFileSystemWatcher(
-				path.resolve(newPathFiles[0].fsPath)
+				path.resolve(newPathFile[0].fsPath)
 			)
 		);
 	}
