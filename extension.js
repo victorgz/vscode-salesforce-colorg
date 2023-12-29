@@ -8,18 +8,15 @@ const NEW_PATH = '**/.sf/config.json';
 const outputChannel = vscode.window.createOutputChannel('SF Colorg');
 
 async function getSfConfigFile() {
-    const configFile = await vscode.workspace.findFiles(
-        `{${NEW_PATH},${OLD_PATH}}`,
-        '**/node_modules/**',
-        1
-    );
+	const configFile = await vscode.workspace.findFiles(
+		`{${NEW_PATH},${OLD_PATH}}`,
+		'**/node_modules/**',
+		1
+	);
 
-    outputChannel.appendLine(`Config file: ${configFile}`);
-
-    // return regardless of whether it's found or not
-    return configFile[0];
+	// return regardless of whether it's found or not
+	return configFile[0];
 }
-
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -27,11 +24,11 @@ async function activate() {
 	/**
 	 *
 	 * @param {string} uri - file uri of the config file
+	 * @param {vscode.WorkspaceConfiguration} [vscodeConfig] - vscode configuration object
 	 */
-	const handleFileContent = (uri) => {
+	const handleFileContent = async(uri, vscodeConfig = vscode.workspace.getConfiguration()) => {
 		const file = requireUncached(path.resolve(uri.fsPath));
-		const conf = vscode.workspace.getConfiguration();
-		const targets = conf.get('sf-colorg.rules') || [];
+		const targets = await vscodeConfig.get('sf-colorg.rules') || [];
 		let targetBackgroundColor = undefined;
 		let targetForegroundColor = undefined;
 
@@ -46,6 +43,7 @@ async function activate() {
 				break;
 			}
 		}
+
 		setColor(targetBackgroundColor, targetForegroundColor);
 	};
 
@@ -72,27 +70,24 @@ async function activate() {
 	});
 
 	// Event listener for when the window is focused
-	vscode.window.onDidChangeWindowState(async() => {
-		const config = vscode.workspace.getConfiguration();
+	vscode.window.onDidChangeWindowState(async () => {
+		const vscodeConfig = vscode.workspace.getConfiguration();
 		const sfConfigFile = await getSfConfigFile();
 
 		if (!sfConfigFile) {
 			return setColor(undefined, undefined);
 		}
 
-		if (
-			!vscode.window.state.focused &&
-			config.get('sf-colorg.target.settingsScope') === 'user'
-		) {
-			return setColor(undefined, undefined);
-		} else {
-			const isASfProject = checkIfInSfProject();
-			// If the focused window is confirmed to be a SF project
-			if (isASfProject) {
+		if (vscode.window.state.focused &&
+			vscodeConfig.get('sf-colorg.target.settingsScope') === 'user') {
+			// Ignore the unnecessary await warning here, it's needed.
+			const isASfProject = await checkIfInSfProject();
+
+			// If the focused window is explictly confirmed to be a SF project
+			if (isASfProject === true) {
 				// Bypass initialization if targets are already available
-				return handleFileContent(sfConfigFile);
+				return handleFileContent(sfConfigFile, vscodeConfig);
 			}
-			return setColor(undefined, undefined);
 		}
 	});
 
