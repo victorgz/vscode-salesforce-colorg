@@ -61,10 +61,20 @@
 							},
 							"color": {
 								"type": "string",
-								"description": "The color in HEX format to apply to your workspace"
+								"description": "The background color in HEX format to apply to your workspace"
+							},
+							"foregroundColor": {
+								"type": "string",
+								"description": "The foreground color in HEX format to apply to your workspace"
 							}
 						}
 					}
+				},
+				"sf-colorg.target.settingsScope": {
+					"type": "string",
+					"default": "user",
+					"enum": ["workspace", "user"],
+					"description": "Specify where to apply the color settings (user or workspace JSON settings file)"
 				}
 			}
 		}
