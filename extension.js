@@ -52,7 +52,7 @@ async function activate() {
 		await initialCleanup();
 		const sfConfigFile = await getSfConfigFile();
 
-		if (!sfConfigFile || !vscode.window.state.focused) {
+		if (!sfConfigFile) {
 			return;
 		} else {
 			outputChannel.appendLine('Found config file:', JSON.stringify(sfConfigFile));
