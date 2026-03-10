@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0] (unreleased)
+
+### Features
+
+-   add automatic foreground (text) color based on background for WCAG contrast compliance
+-   add optional `foreground` property per rule to override auto-computed text color
+
 ### [1.1.1](https://github.com/victorgz/vscode-salesforce-colorg/compare/v1.1.0...v1.1.1) (2023-04-18)
 
 ### Bug Fixes

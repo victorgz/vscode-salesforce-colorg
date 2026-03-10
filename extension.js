@@ -16,6 +16,7 @@ async function activate() {
 
 		const targets = conf.get('sf-colorg.rules') || [];
 		let targetColor = null;
+		let targetForeground = null;
 		for (let target of targets) {
 			const attribute = uri.fsPath.includes('/.sfdx/')
 				? 'defaultusername'
@@ -23,10 +24,11 @@ async function activate() {
 
 			if (new RegExp(target.regex).test(file[attribute])) {
 				targetColor = target.color;
+				targetForeground = target.foreground;
 				break;
 			}
 		}
-		setColor(targetColor);
+		setColor(targetColor, targetForeground);
 	};
 
 	const init = async () => {
@@ -83,22 +85,43 @@ async function activate() {
 	});
 }
 
-async function setColor(color) {
+function getRelativeLuminance(hex) {
+	const r = parseInt(hex.slice(1, 3), 16) / 255;
+	const g = parseInt(hex.slice(3, 5), 16) / 255;
+	const b = parseInt(hex.slice(5, 7), 16) / 255;
+	const [rs, gs, bs] = [r, g, b].map((c) =>
+		c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+	);
+	return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+async function setColor(color, foreground) {
 	const config = vscode.workspace.getConfiguration();
 	const colorCustomizations = config.get('workbench.colorCustomizations');
 	const statusBar = config.get('sf-colorg.target.statusBar');
 	const activityBar = config.get('sf-colorg.target.activityBar');
 
+	let fg = foreground;
+	if (color && !fg) {
+		fg = getRelativeLuminance(color) > 0.4 ? '#000000' : '#FFFFFF';
+	}
+
 	if (statusBar || color == null) {
 		colorCustomizations['statusBar.background'] = color;
+		colorCustomizations['statusBar.foreground'] =
+			color != null ? fg : undefined;
 	} else {
 		colorCustomizations['statusBar.background'] = undefined;
+		colorCustomizations['statusBar.foreground'] = undefined;
 	}
 
 	if (activityBar || color == null) {
 		colorCustomizations['activityBar.background'] = color;
+		colorCustomizations['activityBar.foreground'] =
+			color != null ? fg : undefined;
 	} else {
 		colorCustomizations['activityBar.background'] = undefined;
+		colorCustomizations['activityBar.foreground'] = undefined;
 	}
 
 	await vscode.workspace
@@ -116,7 +139,9 @@ async function initialCleanup() {
 	const colorCustomizations = config.get('workbench.colorCustomizations');
 
 	colorCustomizations['statusBar.background'] = undefined;
+	colorCustomizations['statusBar.foreground'] = undefined;
 	colorCustomizations['activityBar.background'] = undefined;
+	colorCustomizations['activityBar.foreground'] = undefined;
 
 	return vscode.workspace
 		.getConfiguration()

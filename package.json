@@ -62,6 +62,10 @@
 							"color": {
 								"type": "string",
 								"description": "The color in HEX format to apply to your workspace"
+							},
+							"foreground": {
+								"type": "string",
+								"description": "Optional foreground (text) color in HEX format for WCAG contrast. If omitted, black or white is chosen automatically based on background luminance"
 							}
 						}
 					}

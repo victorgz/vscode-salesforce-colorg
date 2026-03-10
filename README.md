@@ -13,12 +13,13 @@ Once configured, the extension will run in the background each time you change y
 
 ### 1. Define your own rules
 
-Go to your Visual Studio Code settings and find the Rules setting under the Salesforce ColORG extension. The rules are a list of objects with two attributes:
+Go to your Visual Studio Code settings and find the Rules setting under the Salesforce ColORG extension. The rules are a list of objects with the following attributes:
 
-| Attribute | Description                                                                                                                               | Type   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| regex     | The Regular Expression used to match your org alias                                                                                       | string |
-| color     | The color in [HEX format](https://g.co/kgs/UXFjkA) that will be applied to the workspace when the RegularExpresion matches your org alias | string |
+| Attribute  | Description                                                                                                                               | Type   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| regex      | The Regular Expression used to match your org alias                                                                                       | string |
+| color      | The color in [HEX format](https://g.co/kgs/UXFjkA) that will be applied to the workspace when the RegularExpresion matches your org alias | string |
+| foreground | Optional. Text color in HEX format for WCAG contrast. If omitted, black or white is chosen automatically based on background luminance    | string |
 
 Here there's an example with two rules configured. You can add as many as you want:
 
@@ -30,10 +31,13 @@ Here there's an example with two rules configured. You can add as many as you wa
 	},
 	{
 		"regex": "^\\w*_UAT$",
-		"color": "#00AE6B"
+		"color": "#00AE6B",
+		"foreground": "#FFFFFF"
 	}
 ]
 ```
+
+With `foreground` omitted, text color is chosen automatically. Add `foreground` to override with a specific color.
 
 You can find here some pre-defined Regular Expressions to help you with the initial setup:
 
@@ -54,6 +58,13 @@ You can find here some pre-defined Regular Expressions to help you with the init
 ### 2. Specify where to apply the color
 
 You can define whether the color will change in your VSCode workspace for the Activity Bar, the Satus Bar or both of them!
+
+### 3. Accessibility
+
+The extension applies WCAG 2.1 contrast guidelines for readable text:
+
+-   **Automatic foreground**: When `foreground` is not specified, the text color is derived from the background luminance (black on light backgrounds, white on dark) to meet contrast requirements.
+-   **Optional override**: You can set `foreground` explicitly per rule for custom text colors when the automatic choice does not suit your needs.
 
 <div align="center">
 		<img align="center" alt="Color target demo" src="./assets/color-target-demo.png" />
