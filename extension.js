@@ -100,6 +100,7 @@ async function setColor(color, foreground) {
 	const colorCustomizations = config.get('workbench.colorCustomizations');
 	const statusBar = config.get('sf-colorg.target.statusBar');
 	const activityBar = config.get('sf-colorg.target.activityBar');
+	const titleBar = config.get('sf-colorg.target.titleBar');
 
 	let fg = foreground;
 	if (color && !fg) {
@@ -124,6 +125,15 @@ async function setColor(color, foreground) {
 		colorCustomizations['activityBar.foreground'] = undefined;
 	}
 
+	if (titleBar || color == null) {
+		colorCustomizations['titleBar.activeBackground'] = color;
+		colorCustomizations['titleBar.activeForeground'] =
+			color != null ? fg : undefined;
+	} else {
+		colorCustomizations['titleBar.activeBackground'] = undefined;
+		colorCustomizations['titleBar.activeForeground'] = undefined;
+	}
+
 	await vscode.workspace
 		.getConfiguration()
 		.update(
@@ -142,6 +152,8 @@ async function initialCleanup() {
 	colorCustomizations['statusBar.foreground'] = undefined;
 	colorCustomizations['activityBar.background'] = undefined;
 	colorCustomizations['activityBar.foreground'] = undefined;
+	colorCustomizations['titleBar.activeBackground'] = undefined;
+	colorCustomizations['titleBar.activeForeground'] = undefined;
 
 	return vscode.workspace
 		.getConfiguration()
