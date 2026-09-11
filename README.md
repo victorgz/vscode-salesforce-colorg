@@ -57,7 +57,7 @@ You can find here some pre-defined Regular Expressions to help you with the init
 
 ### 2. Specify where to apply the color
 
-You can define whether the color will change in your VSCode workspace for the Activity Bar, the Satus Bar or both of them!
+You can define whether the color will change in your VSCode workspace for the Activity Bar, the Status Bar, the Title Bar, or any combination of them!
 
 ### 3. Accessibility
 
